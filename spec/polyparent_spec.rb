@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 class TestController < ActionController::Base
-  include BeefExtras::ActionController::PolyParent
+  include PolyParent
   parent_resources :user, :animal, :shoe, :string
 end
 

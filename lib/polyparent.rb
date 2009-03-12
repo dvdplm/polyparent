@@ -19,37 +19,33 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-module BeefExtras #:nodoc:
-  module ActionController #:nodoc:
-    module PolyParent #:nodoc:
+module PolyParent #:nodoc:
 
-      def self.included(base) # :nodoc:
-        base.extend ClassMethods
-      end
+  def self.included(base) # :nodoc:
+    base.extend ClassMethods
+  end
 
-      module ClassMethods
-        def parent_resources(*parents)
-          @parent_resources ||= parents
-        end
-      end
-
-      def parent_instance
-        parent_class && parent_class.find(parent_resource_id(parent_resource_type))
-      end
-
-      def parent_class
-        parent_resource_type && parent_resource_type.to_s.classify.constantize
-      end
-
-      def parent_resource_type
-        self.class.parent_resources.detect { |parent| parent_resource_id(parent) }
-      end
-
-      def parent_resource_id(parent)
-        request.path_parameters["#{ parent }_id"]
-      end
-      
-      private :parent_resource_id, :parent_resource_type
+  module ClassMethods
+    def parent_resources(*parents)
+      @parent_resources ||= parents
     end
   end
+
+  def parent_instance
+    parent_class && parent_class.find(parent_resource_id(parent_resource_type))
+  end
+
+  def parent_class
+    parent_resource_type && parent_resource_type.to_s.classify.constantize
+  end
+
+  def parent_resource_type
+    self.class.parent_resources.detect { |parent| parent_resource_id(parent) }
+  end
+
+  def parent_resource_id(parent)
+    request.path_parameters["#{ parent }_id"]
+  end
+  
+  private :parent_resource_id, :parent_resource_type
 end
