@@ -40,11 +40,11 @@ module PolyParent #:nodoc:
   end
 
   def parent_resource_type
-    self.class.parent_resources.detect { |parent| parent_resource_id(parent) }
+    @parent_resource_type ||= self.class.parent_resources.detect { |parent| parent_resource_id(parent) }
   end
 
   def parent_resource_id(parent)
-    request.path_parameters["#{ parent }_id"]
+    @parent_resource_id ||= request.path_parameters["#{ parent }_id"]
   end
   
   private :parent_resource_id, :parent_resource_type

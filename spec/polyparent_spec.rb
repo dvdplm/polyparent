@@ -30,14 +30,29 @@ describe "PolyParent" do
       setup_request(:action => "show", :id => "123", :stuff => "somestring", :controller => "test_controller", :user_id => 321)
     end
     
-    it "extracts the ID of the parent resource instance from the params" do
-      @controller.send(:parent_resource_id, 'user').should == 321
+    describe "extracts the ID of the parent resource instance from the params" do
+      it "extracts the ID" do
+        @controller.send(:parent_resource_id, 'user').should == 321
+      end
+      
+      it "memoizes the resource ID for quick lookup" do
+        @controller.request.should_receive(:path_parameters).once.and_return('user_id' => 321)
+        3.times do
+          @controller.send(:parent_resource_id, 'user').should == 321
+        end
+      end
     end
     
-    describe "extracts the type of the parent resource using the params and the parent resources" do
-      
+    describe "extracts the type (class name as String) of the parent resource using the params and the parent resources" do
       it "does exactly that" do
         @controller.send(:parent_resource_type).should == :user
+      end
+      
+      it "memoizes the resource type for quick lookup" do
+        TestController.should_receive(:parent_resources).once.and_return([:beef, :pork, :milk, :user])
+        3.times do
+          @controller.send(:parent_resource_type).should == :user
+        end
       end
     
       describe "copes with a whacky params hash" do
