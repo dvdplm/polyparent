@@ -31,21 +31,44 @@ module PolyParent #:nodoc:
     end
   end
 
-  def parent_instance
-    parent_class && parent_class.find(parent_resource_id(parent_resource_type))
+  def parent_instances
+    @parent_instances ||=
+      request.path.split('/').reject(&:blank?).inject([]) do |parents, path_component|
+        path_component = path_component.singularize
+        if self.class.parent_resources.include?(path_component.to_sym)
+          instance = instance_from_path_component(path_component)
+          parents << add_klassy_name(instance)
+        end
+        parents
+      end
   end
 
-  def parent_class
-    parent_resource_type && parent_resource_type.to_s.classify.constantize
-  end
-
-  def parent_resource_type
-    @parent_resource_type ||= self.class.parent_resources.detect { |parent| parent_resource_id(parent) }
-  end
-
-  def parent_resource_id(parent)
-    @parent_resource_id ||= request.path_parameters["#{ parent }_id"]
+protected
+  def set_poly_parents
+    if parent_instances.blank?
+      raise ArgumentError, "No parent resources found in the request path \"#{request.path}\". #{self.class} has to be accessed through a PolyParent route!"
+    else
+      @parents = parent_instances
+    end
   end
   
-  private :parent_resource_id, :parent_resource_type
+private
+  def parent_resource_id(parent)
+    request.path_parameters["#{ parent }_id"]
+  end
+  
+  def instance_from_path_component(path_component)
+    klass = path_component.classify.constantize.base_class
+    klass.find(parent_resource_id(path_component)).becomes(klass)
+  end
+
+  def add_klassy_name(instance)
+    returning instance do
+      instance.instance_eval do
+        def klassy_name
+          self.class.class_name.downcase
+        end
+      end
+    end
+  end
 end
