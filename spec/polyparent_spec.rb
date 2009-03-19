@@ -11,10 +11,9 @@ class TestController < ActionController::Base
 end
 
 describe "PolyParent" do
-  require 'ostruct'
   def setup_request(path, params)
-    request = mock('web request', :path => path, :path_parameters => params.with_indifferent_access)
-    @controller.stub!(:request).and_return(request)
+    @request = mock('web request', :path => path, :path_parameters => params.with_indifferent_access)
+    @controller.stub!(:request).and_return(@request)
   end
   
   before do
@@ -35,20 +34,39 @@ describe "PolyParent" do
     end
     
     describe "builds an Array of parent resources from the request path, keeping trace of the (hierarchical-)order among them" do
+      before do
+        @user   = User.new
+        @controller.stub!(:add_klassy_name).with(@user).and_return(@user)
+
+        @animal = Animal.new
+
+        @controller.stub!(:add_klassy_name).and_return(@user)
+        @controller.stub!(:instance_from_path_component).and_return(@user)
+      end
+      
       it "splits the path on the '/' char" do
-        pending
+        @request.path.should_receive(:split).with('/').and_return(['', 'users', '321', 'stuff', 'animals', 'stuff'])
+        @controller.parent_instances
       end
       
       it "weeds out any blanks among the path components " do
-        pending
+        path_components = [pc1 = '', pc2 = 'users']
+        @request.path.stub!(:split).and_return(path_components)
+
+        pc1.should_receive(:blank?).and_return(true)
+        pc2.should_receive(:blank?).and_return(false)
+        @controller.parent_instances
       end
       
       it "adds the pieces of the path that appear in the parent_resources collection" do
-        pending
+        @request.stub!(:path).and_return('/one/two/three')
+        TestController.parent_resources.should_receive(:include?).exactly(3).times
+        @controller.parent_instances
       end
       
       it "adds the klassy_name method to the instances in the parents Array" do
-        pending
+        @controller.should_receive(:add_klassy_name).with(@user).and_return(@user)
+        @controller.parent_instances
       end
     end
     
