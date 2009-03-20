@@ -1,6 +1,6 @@
 PolyParent
 ==========
-_PolyParent_ is a plugin designed to help you 'mount' a controller in different areas in your application to help you avoid code repetition. In other words you want both these URLs to map to the same controller action:
+_PolyParent_ is a plugin designed to help DRY up your controllers and views for polymorphic objects. In other words you want both these URLs to map to the same controller action:
 
     /customers/123/phone_numbers/new
     /customers/123/locations/321/phone_numbers/new
@@ -20,7 +20,7 @@ To make both URLs map to the same controller action you modify the above to beco
       end
     end
 
-Now you have an issue though. When processing requests to `PhoneNumbersController` you have no way of knowing where to attach the new `PhoneNumber`. How can you avoid havoing two different controlelr actions doing exactly the same thing? Or even worse, having two different controllers, one dealing with `PhoneNumber`s associated to `Customer`s and the other to `Location`s?
+Now you have an issue though. When processing requests to `PhoneNumbersController` you have no way of knowing where to attach the new `PhoneNumber`. How can you avoid havoing two different controller actions doing exactly the same thing? Or even worse, having two different controllers, one dealing with `PhoneNumber`s associated to `Customer`s and the other to `Location`s?
 
 Let's look at how the 'normal' controller actions would look.
 
